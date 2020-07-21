@@ -9,12 +9,10 @@
         <field name="inherit_id" ref="account.product_template_form_view"/>
         <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
         <field name="arch" type="xml">
-            <field name="taxes_id" position="after">
-                <button name="set_multicompany_taxes"
-                        colspan="2"
-                        string="Propagate Taxes"
-                        type="object"/>
-            </field>
+            <xpath expr="//field[@name='product_variant_id']" position="before">
+                <button name="set_multicompany_taxes" string="Propagate Taxes" groups="account.group_account_user" type="object"/>
+            </xpath>
+
         </field>
     </record>
 
