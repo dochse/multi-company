@@ -2,7 +2,7 @@
 # Copyright 2018 Vicent Cubells - Tecnativa <vicent.cubells@tecnativa.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models
+from odoo import api, models, SUPERUSER_ID
 
 
 class ProductTemplate(models.Model):
@@ -24,13 +24,12 @@ class ProductTemplate(models.Model):
             ]).ids)
         return taxes_ids
 
-    @api.multi
     def set_multicompany_taxes(self):
         self.ensure_one()
         customer_tax_ids = self.taxes_id.ids
         supplier_tax_ids = self.supplier_taxes_id.ids
         company_id = self.env.user.company_id.id
-        obj = self.sudo()
+        obj = self.with_user(SUPERUSER_ID)
         default_customer_tax_ids = obj.taxes_by_company(
             'taxes_id', company_id)
         default_supplier_tax_ids = obj.taxes_by_company(
@@ -53,9 +52,9 @@ class ProductTemplate(models.Model):
             'supplier_taxes_id': [(6, 0, supplier_tax_ids)],
         })
 
-    @api.model
-    def create(self, vals):
-        res = super(ProductTemplate, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(ProductTemplate, self).create(vals_list)
         res.set_multicompany_taxes()
         return res
 
@@ -63,6 +62,5 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    @api.multi
     def set_multicompany_taxes(self):
         self.product_tmpl_id.set_multicompany_taxes()
